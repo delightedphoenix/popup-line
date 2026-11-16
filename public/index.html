@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lexie Wilcox Photography pop-up — Coming soon</title>
-  <meta name="description" content="Lexie Wilcox Photography pop-up. Coming soon.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Lexie Wilcox Photography pop-up — Join the line</title>
+  <meta name="description" content="Lexie Wilcox Photography pop-up. Join the line.">
   <style>
     :root {
       --paper: #fdf6ec;
@@ -35,10 +35,16 @@
       justify-content: center;
       text-align: center;
       padding: 24px;
+      -webkit-text-size-adjust: 100%;
     }
 
     main {
+      width: 100%;
       max-width: 30rem;
+    }
+
+    [hidden] {
+      display: none !important;
     }
 
     .sun {
@@ -63,17 +69,83 @@
       margin: 26px auto;
     }
 
-    h1 {
-      font-size: clamp(3rem, 15vw, 6rem);
-      line-height: 1.05;
-      font-weight: bold;
+    .join-form {
+      text-align: left;
     }
 
-    .note {
-      margin-top: 30px;
+    .join-form label {
+      display: block;
       font-family: Verdana, Geneva, sans-serif;
-      font-size: clamp(1rem, 4vw, 1.15rem);
-      line-height: 1.6;
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .join-form input {
+      width: 100%;
+      height: 56px;
+      padding: 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      color: var(--ink);
+      background: #fffdf9;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .join-form input:focus {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .join-btn {
+      width: 100%;
+      height: 64px;
+      margin-top: 18px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 0.02em;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease;
+    }
+
+    .join-btn:hover,
+    .join-btn:active {
+      background: #9c461f;
+    }
+
+    .join-btn:focus {
+      outline: 3px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .join-btn:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
+
+    .message {
+      min-height: 26px;
+      margin-top: 14px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 18px;
+      line-height: 1.5;
+      color: #7a2c12;
+    }
+
+    .confirm {
+      font-size: clamp(2rem, 9vw, 3rem);
+      line-height: 1.15;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -82,8 +154,21 @@
     <div class="sun" aria-hidden="true"></div>
     <p class="name">Lexie Wilcox Photography pop-up</p>
     <div class="divider" aria-hidden="true"></div>
-    <h1>Coming soon</h1>
-    <p class="note">We&rsquo;re getting everything ready for the pop-up. Check back soon.</p>
+
+    <form id="join-form" class="join-form" novalidate>
+      <label for="first-name">First name</label>
+      <input id="first-name" name="firstName" type="text"
+             autocomplete="given-name" autocapitalize="words" enterkeyhint="go"
+             placeholder="e.g. Maya">
+      <button type="submit" class="join-btn">Join</button>
+      <p id="form-message" class="message" role="alert" aria-live="assertive"></p>
+    </form>
+
+    <div id="confirmation" class="confirmation" hidden>
+      <h1 class="confirm"><span>You&rsquo;re in line, </span><span id="confirm-name"></span><span>!</span></h1>
+    </div>
   </main>
+
+  <script type="module" src="join.js"></script>
 </body>
 </html>
