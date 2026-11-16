@@ -6,7 +6,7 @@ Guests scan a QR code at the booth, type their first name, and watch their place
 
 ## Status
 
-**Slice 1, step 1 is built:** the "Coming soon" page is in `public/index.html`, with Firebase Hosting config (`firebase.json`, `.firebaserc`) and the web config in `public/firebase-config.js`. It still needs to be deployed and opened on a phone. Steps 2 through 6 follow, one build step at a time, following the build brief.
+**Slice 1, steps 1 and 2 are built:** the Join page is in `public/index.html` and `public/join.js`. It saves a guest's first name to the Firestore collection `guests` and is live at `https://lexies-photo-pop.web.app`. Steps 3 through 6 follow, one build step at a time, following the build brief.
 
 ## How the docs are laid out
 
