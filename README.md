@@ -6,7 +6,7 @@ Guests scan a QR code at the booth, type their first name, and watch their place
 
 ## Status
 
-**Slice 1 is not built yet.** This repository currently holds the plan and the decisions behind it. The code will be added one build step at a time, following the build brief.
+**Slice 1, step 1 is built:** the "Coming soon" page is in `public/index.html`, with Firebase Hosting config (`firebase.json`, `.firebaserc`) and the web config in `public/firebase-config.js`. It still needs to be deployed and opened on a phone. Steps 2 through 6 follow, one build step at a time, following the build brief.
 
 ## How the docs are laid out
 
@@ -17,6 +17,16 @@ Guests scan a QR code at the booth, type their first name, and watch their place
 | [docs/setup.md](docs/setup.md) | What has already been set up (Firebase, GitHub) and what is still to do. |
 | [docs/roadmap.md](docs/roadmap.md) | What comes after slice 1. |
 | [docs/tickets/](docs/tickets/) | One ticket per build step for slice 1, for the coding agents. |
+
+## How to deploy
+
+The site is plain static files in `public/`, hosted on Firebase Hosting. From the root of the repo:
+
+1. Install the Firebase CLI: `npm install -g firebase-tools`
+2. Log in: `firebase login`
+3. Deploy: `firebase deploy --only hosting`
+
+The page is then live at `https://lexies-photo-pop.web.app`.
 
 ## Tickets for the coding agents
 
