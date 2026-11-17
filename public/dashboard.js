@@ -11,11 +11,13 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   getFirestore,
   onSnapshot,
   query,
   runTransaction,
   where,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
@@ -36,7 +38,9 @@ const lineError = document.getElementById("line-error");
 const nowUpName = document.getElementById("now-up-name");
 const nextBtn = document.getElementById("next-btn");
 const noshowBtn = document.getElementById("noshow-btn");
+const endBtn = document.getElementById("end-btn");
 const actionMessage = document.getElementById("action-message");
+const endMessage = document.getElementById("end-message");
 
 let lineListenerStarted = false;
 
@@ -95,6 +99,9 @@ function refreshButtonStates() {
   // guest to clear. No-show needs a called guest to remove.
   nextBtn.disabled = actionRunning || (!hasWaiting && !hasCalled);
   noshowBtn.disabled = actionRunning || !hasCalled;
+  // End event is always available (it also clears an empty line); it is
+  // disabled only while one of the actions is running.
+  endBtn.disabled = actionRunning;
 }
 
 function renderLine(docs) {
@@ -224,6 +231,45 @@ async function handleNoShow() {
   }
 }
 
+// END EVENT: after an "Are you sure?" check, delete every doc in `guests`
+// (all statuses) with writeBatch, in batches of at most 400, committing each
+// batch. This is a destructive, one-way action.
+async function handleEndEvent() {
+  if (actionRunning) return;
+
+  const sure = window.confirm(
+    "End the event? This removes everyone from the line and cannot be undone."
+  );
+  if (!sure) {
+    return;
+  }
+
+  actionRunning = true;
+  endMessage.textContent = "";
+  refreshButtonStates();
+
+  try {
+    const snapshot = await getDocs(collection(db, "guests"));
+    const refs = snapshot.docs.map((guestDoc) => guestDoc.ref);
+
+    const BATCH_SIZE = 400;
+    for (let i = 0; i < refs.length; i += BATCH_SIZE) {
+      const batch = writeBatch(db);
+      for (let j = i; j < i + BATCH_SIZE && j < refs.length; j++) {
+        batch.delete(refs[j]);
+      }
+      await batch.commit();
+    }
+
+    endMessage.textContent = "The line is empty.";
+  } catch (_err) {
+    endMessage.textContent = "That didn't go through. Please try again.";
+  } finally {
+    actionRunning = false;
+    refreshButtonStates();
+  }
+}
+
 function startLineListener() {
   if (lineListenerStarted) return;
   lineListenerStarted = true;
@@ -266,6 +312,7 @@ function unlock() {
 
 nextBtn.addEventListener("click", handleNext);
 noshowBtn.addEventListener("click", handleNoShow);
+endBtn.addEventListener("click", handleEndEvent);
 
 signInForm.addEventListener("submit", async (event) => {
   event.preventDefault();

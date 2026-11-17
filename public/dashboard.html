@@ -270,6 +270,49 @@
       line-height: 1.5;
       color: #7a2c12;
     }
+
+    /* At least 48px of space above this button, at the very bottom of the
+       line view, so it is hard to tap by mistake. */
+    .end-btn {
+      width: 100%;
+      height: 56px;
+      margin-top: 48px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 0.02em;
+      color: #7a2c12;
+      background: transparent;
+      border: 2px solid #7a2c12;
+      border-radius: 12px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease;
+    }
+
+    .end-btn:hover,
+    .end-btn:active {
+      background: rgba(122, 44, 18, 0.08);
+    }
+
+    .end-btn:focus {
+      outline: 3px solid #7a2c12;
+      outline-offset: 2px;
+    }
+
+    .end-btn:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
+
+    .end-message {
+      min-height: 26px;
+      margin-top: 14px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 18px;
+      line-height: 1.5;
+      color: #7a2c12;
+    }
   </style>
 </head>
 <body>
@@ -298,9 +341,12 @@
       <h1 id="line-heading" class="line-heading">No one is waiting yet.</h1>
       <ol id="line-list" class="line-list"></ol>
       <p id="line-error" class="message" role="alert" hidden>We lost the connection. Please refresh the page.</p>
+
+      <button id="end-btn" class="end-btn" type="button" disabled>End event</button>
+      <p id="end-message" class="end-message" role="alert"></p>
     </section>
   </main>
 
-  <script type="module" src="dashboard.js?v=5"></script>
+  <script type="module" src="dashboard.js?v=6"></script>
 </body>
 </html>
