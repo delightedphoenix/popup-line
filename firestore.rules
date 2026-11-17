@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // The line. v1 has no sign-in, so the dashboard's actions (Next,
+    // No-show, End event) cannot be told apart from anyone else's.
+    // These rules stop junk data; they are a light lock, not real security.
+    // Slice 2 should move update and delete behind Firebase Auth.
+    match /guests/{guestId} {
+      allow read: if true;
+
+      allow create: if request.resource.data.keys().hasOnly(['firstName', 'joinedAt', 'status'])
+        && request.resource.data.keys().hasAll(['firstName', 'joinedAt', 'status'])
+        && request.resource.data.firstName is string
+        && request.resource.data.firstName.size() <= 30
+        && request.resource.data.firstName.trim().size() >= 1
+        && request.resource.data.joinedAt == request.time
+        && request.resource.data.status == 'waiting';
+
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['waiting', 'called', 'done', 'noshow'];
+
+      allow delete: if true;
+    }
+
+    // The dashboard passcode. Lexie sets it in the Firebase console, which
+    // is not limited by these rules. Pages may read it, never write it.
+    match /settings/dashboard {
+      allow get: if true;
+      allow list, write: if false;
+    }
+  }
+}
