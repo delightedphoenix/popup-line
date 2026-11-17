@@ -82,6 +82,7 @@ function placeInLine() {
   if (!guestId || waitingGuests === null) return null;
   let earlier = 0;
   for (const other of waitingGuests) {
+    if (other.id === guestId) continue;
     let isEarlier;
     if (guestJoinedAtMs !== null && other.joinedAtMs !== null) {
       isEarlier =
