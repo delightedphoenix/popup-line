@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <title>Lexie Wilcox Photography pop-up — Dashboard</title>
+  <meta name="description" content="Lexie Wilcox Photography pop-up. Dashboard.">
+  <style>
+    :root {
+      --paper: #fdf6ec;
+      --paper-deep: #f6e6d0;
+      --ink: #2a2018;
+      --accent: #b4562a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% 18%, #fff9f0 0%, transparent 55%),
+        linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    main {
+      width: 100%;
+      max-width: 30rem;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .sun {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin: 0 auto 34px;
+    }
+
+    .name {
+      font-size: clamp(1.4rem, 5.5vw, 2rem);
+      font-weight: normal;
+      letter-spacing: 0.01em;
+    }
+
+    .dash-label {
+      margin-top: 10px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .divider {
+      width: 64px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin: 26px auto;
+    }
+
+    .join-form {
+      text-align: left;
+    }
+
+    .join-form label {
+      display: block;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .join-form input {
+      width: 100%;
+      height: 56px;
+      padding: 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      color: var(--ink);
+      background: #fffdf9;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .join-form input:focus {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .join-btn {
+      width: 100%;
+      height: 64px;
+      margin-top: 18px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 0.02em;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease;
+    }
+
+    .join-btn:hover,
+    .join-btn:active {
+      background: #9c461f;
+    }
+
+    .join-btn:focus {
+      outline: 3px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .join-btn:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
+
+    .message {
+      min-height: 26px;
+      margin-top: 14px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 18px;
+      line-height: 1.5;
+      color: #7a2c12;
+    }
+
+    .line-view {
+      text-align: center;
+    }
+
+    .line-heading {
+      font-size: clamp(1.6rem, 7vw, 2.4rem);
+      font-weight: bold;
+      line-height: 1.2;
+    }
+
+    .line-list {
+      list-style-position: inside;
+      margin: 18px 0 0;
+    }
+
+    .line-list li {
+      font-size: clamp(1.8rem, 8vw, 2.6rem);
+      font-weight: bold;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="sun" aria-hidden="true"></div>
+    <p class="name">Lexie Wilcox Photography pop-up</p>
+    <p class="dash-label">Dashboard</p>
+    <div class="divider" aria-hidden="true"></div>
+
+    <form id="sign-in-form" class="join-form" novalidate>
+      <label for="passcode">Passcode</label>
+      <input id="passcode" name="passcode" type="password"
+             autocomplete="off" enterkeyhint="go">
+      <button type="submit" class="join-btn">Open dashboard</button>
+      <p id="sign-in-message" class="message" role="alert" aria-live="assertive"></p>
+    </form>
+
+    <section id="line-view" class="line-view" hidden aria-live="polite">
+      <h1 id="line-heading" class="line-heading">No one is waiting yet.</h1>
+      <ol id="line-list" class="line-list"></ol>
+      <p id="line-error" class="message" role="alert" hidden>We lost the connection. Please refresh the page.</p>
+    </section>
+  </main>
+
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>
