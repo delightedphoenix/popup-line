@@ -156,10 +156,12 @@ function startMyPlaceView(id) {
     onSnapshot(
       doc(db, "guests", id),
       (snapshot) => {
-        if (
-          !snapshot.exists() &&
-          !(snapshot.metadata.fromCache && snapshot.metadata.hasPendingWrites)
-        ) {
+        if (!snapshot.exists()) {
+          // Only the server can say the guest is gone. A "missing" answer
+          // from the local cache (for example with no signal) is ignored,
+          // so a guest never loses their place because of a bad connection.
+          if (snapshot.metadata.fromCache) return;
+
           // This guest is no longer in the line: forget the id and offer
           // to join again.
           try {
@@ -168,6 +170,8 @@ function startMyPlaceView(id) {
             // Best-effort cleanup; the form still gets shown below.
           }
           stopMyPlaceView();
+          nameInput.value = "";
+          joinButton.disabled = false;
           form.hidden = false;
           return;
         }
