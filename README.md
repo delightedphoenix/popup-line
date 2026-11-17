@@ -59,6 +59,10 @@ The work is grouped into three chunks (GitHub milestones):
 5. [Step 5: Next and No-show buttons](docs/tickets/step-5-next.md)
 6. [Step 6: End event, QR code page and lock-down](docs/tickets/step-6-end-event-qr.md)
 
+### After Slice 1 works on a phone
+
+7. [Step 7: Session times and photo log](docs/tickets/step-7-session-times.md)
+
 ## Rules for anyone working in this repo
 
 - Work one build step at a time, and explain the plan in plain words before writing code.
