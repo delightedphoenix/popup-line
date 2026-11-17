@@ -25,3 +25,7 @@ if (typeof qrcode !== "undefined") {
   qrBox.textContent = "";
   qrBox.appendChild(note);
 }
+
+document.getElementById("print-btn").addEventListener("click", () => {
+  window.print();
+});
