@@ -178,6 +178,98 @@
       font-weight: bold;
       line-height: 1.55;
     }
+
+    .now-up-label {
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .now-up-name {
+      font-size: clamp(1.6rem, 7vw, 2.2rem);
+      font-weight: bold;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 26px;
+    }
+
+    .next-btn {
+      width: 100%;
+      height: 76px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 0.02em;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease;
+    }
+
+    .next-btn:hover,
+    .next-btn:active {
+      background: #9c461f;
+    }
+
+    .next-btn:focus {
+      outline: 3px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .next-btn:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
+
+    /* At least 28px of space above this button so it is hard to tap by
+       mistake, right under the big Next button. */
+    .noshow-btn {
+      width: 100%;
+      height: 56px;
+      margin-top: 32px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      background: transparent;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease;
+    }
+
+    .noshow-btn:hover,
+    .noshow-btn:active {
+      background: var(--paper-deep);
+    }
+
+    .noshow-btn:focus {
+      outline: 3px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .noshow-btn:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
+
+    .action-message {
+      min-height: 26px;
+      margin-top: 14px;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 18px;
+      line-height: 1.5;
+      color: #7a2c12;
+    }
   </style>
 </head>
 <body>
@@ -196,6 +288,13 @@
     </form>
 
     <section id="line-view" class="line-view" hidden aria-live="polite">
+      <p class="now-up-label">Now up</p>
+      <p id="now-up-name" class="now-up-name">No one yet</p>
+
+      <button id="next-btn" class="next-btn" type="button" disabled>Next</button>
+      <button id="noshow-btn" class="noshow-btn" type="button" disabled>No-show</button>
+      <p id="action-message" class="action-message" role="alert"></p>
+
       <h1 id="line-heading" class="line-heading">No one is waiting yet.</h1>
       <ol id="line-list" class="line-list"></ol>
       <p id="line-error" class="message" role="alert" hidden>We lost the connection. Please refresh the page.</p>

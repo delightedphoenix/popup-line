@@ -1,7 +1,10 @@
-// Step 4: Dashboard with passcode. A light lock for Lexie only: the page
-// checks the passcode she stored in Firestore (settings/dashboard) and then
-// shows the line of waiting guests, first names only, live with onSnapshot.
-// Static page, Firebase JS SDK (modular) from the CDN. No build step.
+// Step 5: Dashboard with Next and No-show buttons. A light lock for Lexie
+// only: the page checks the passcode she stored in Firestore
+// (settings/dashboard) and then shows the line of waiting guests (first
+// names only, live with onSnapshot), the guest who is up now, and two
+// buttons: Next calls the oldest waiting guest (and marks any called guest
+// done), No-show removes a called guest. Both actions run as Firestore
+// transactions. Static page, Firebase JS SDK (modular) from the CDN. No build step.
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 import {
@@ -11,6 +14,7 @@ import {
   getFirestore,
   onSnapshot,
   query,
+  runTransaction,
   where,
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
@@ -29,15 +33,26 @@ const lineView = document.getElementById("line-view");
 const lineHeading = document.getElementById("line-heading");
 const lineList = document.getElementById("line-list");
 const lineError = document.getElementById("line-error");
+const nowUpName = document.getElementById("now-up-name");
+const nextBtn = document.getElementById("next-btn");
+const noshowBtn = document.getElementById("noshow-btn");
+const actionMessage = document.getElementById("action-message");
 
 let lineListenerStarted = false;
+
+// Latest snapshots, kept sorted (oldest joinedAt first). Module variables
+// so the buttons always act on the most recent data the page has seen.
+let waitingGuests = [];
+let calledGuests = [];
+let actionRunning = false;
 
 function setSignInMessage(text) {
   signInMessage.textContent = text;
 }
 
-function renderLine(docs) {
-  const guests = docs.map((guestDoc) => {
+// Map a snapshot's docs to plain guest records.
+function mapDocsToGuests(docs) {
+  return docs.map((guestDoc) => {
     const data = guestDoc.data({ serverTimestamps: "estimate" });
     return {
       id: guestDoc.id,
@@ -45,37 +60,168 @@ function renderLine(docs) {
       joinedAtMs: data.joinedAt ? data.joinedAt.toMillis() : null,
     };
   });
+}
 
-  // Same order rule as join.js: joinedAt first, ties broken by document id.
-  // Timestamps that are not known yet (null) sort to the end.
-  guests.sort((a, b) => {
-    const aMissing = a.joinedAtMs === null;
-    const bMissing = b.joinedAtMs === null;
-    if (aMissing || bMissing) {
-      if (aMissing && bMissing) {
-        return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-      }
-      return aMissing ? 1 : -1;
+// Same order rule as join.js: joinedAt first, ties broken by document id.
+// Timestamps that are not known yet (null) sort to the end.
+function compareGuests(a, b) {
+  const aMissing = a.joinedAtMs === null;
+  const bMissing = b.joinedAtMs === null;
+  if (aMissing || bMissing) {
+    if (aMissing && bMissing) {
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
     }
-    if (a.joinedAtMs !== b.joinedAtMs) {
-      return a.joinedAtMs - b.joinedAtMs;
-    }
-    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-  });
+    return aMissing ? 1 : -1;
+  }
+  if (a.joinedAtMs !== b.joinedAtMs) {
+    return a.joinedAtMs - b.joinedAtMs;
+  }
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
+// Who is up now: the called guest with the earliest joinedAt, or "No one
+// yet" when nobody is called. Names go in as text only.
+function refreshNowUp() {
+  const up = calledGuests.length > 0 ? calledGuests[0] : null;
+  nowUpName.textContent = up && up.firstName ? up.firstName : "No one yet";
+}
+
+// Button states, refreshed after every snapshot and after every action.
+function refreshButtonStates() {
+  const hasWaiting = waitingGuests.length > 0;
+  const hasCalled = calledGuests.length > 0;
+
+  // Next is only useful when there is a waiting guest to call or a called
+  // guest to clear. No-show needs a called guest to remove.
+  nextBtn.disabled = actionRunning || (!hasWaiting && !hasCalled);
+  noshowBtn.disabled = actionRunning || !hasCalled;
+}
+
+function renderLine(docs) {
+  waitingGuests = mapDocsToGuests(docs).sort(compareGuests);
 
   // Re-render the whole list on each snapshot; names go in as text only.
   lineList.textContent = "";
-  for (const guest of guests) {
+  for (const guest of waitingGuests) {
     const item = document.createElement("li");
     item.textContent = guest.firstName || "";
     lineList.appendChild(item);
   }
 
   lineHeading.textContent =
-    guests.length === 0
+    waitingGuests.length === 0
       ? "No one is waiting yet."
-      : guests.length + " waiting";
+      : waitingGuests.length + " waiting";
   lineError.hidden = true;
+
+  refreshNowUp();
+  refreshButtonStates();
+}
+
+function renderCalled(docs) {
+  calledGuests = mapDocsToGuests(docs).sort(compareGuests);
+  lineError.hidden = true;
+  refreshNowUp();
+  refreshButtonStates();
+}
+
+function showActionError() {
+  actionMessage.textContent = "That didn't go through. Please try again.";
+}
+
+function clearActionMessage() {
+  actionMessage.textContent = "";
+}
+
+// NEXT: in one transaction, mark any still-called guest done and call the
+// oldest waiting guest. Firestore web transactions can't run queries, so
+// the ids come from the latest snapshots.
+async function handleNext() {
+  if (actionRunning) return;
+  actionRunning = true;
+  clearActionMessage();
+  refreshButtonStates();
+
+  try {
+    const calledIds = calledGuests.map((guest) => guest.id);
+    const firstWaitingId =
+      waitingGuests.length > 0 ? waitingGuests[0].id : null;
+
+    await runTransaction(db, async (tx) => {
+      const calledRefs = calledIds.map((id) => doc(db, "guests", id));
+      let waitingRef = null;
+      if (firstWaitingId) {
+        waitingRef = doc(db, "guests", firstWaitingId);
+      }
+
+      // Read every doc we will touch first.
+      const calledSnapshots = await Promise.all(
+        calledRefs.map((ref) => tx.get(ref))
+      );
+      const waitingSnapshot = waitingRef
+        ? await tx.get(waitingRef)
+        : null;
+
+      // Each still-called guest becomes done.
+      for (const snapshot of calledSnapshots) {
+        if (snapshot.exists() && snapshot.data().status === "called") {
+          tx.update(snapshot.ref, { status: "done" });
+        }
+      }
+
+      // The oldest waiting guest becomes called. If the state changed
+      // underneath us, throw so the whole transaction rolls back.
+      if (waitingRef) {
+        if (
+          !waitingSnapshot.exists() ||
+          waitingSnapshot.data().status !== "waiting"
+        ) {
+          throw new Error("Waiting guest changed before the update.");
+        }
+        tx.update(waitingSnapshot.ref, { status: "called" });
+      }
+    });
+
+    clearActionMessage();
+  } catch (_err) {
+    showActionError();
+  } finally {
+    actionRunning = false;
+    refreshButtonStates();
+  }
+}
+
+// NO-SHOW: in one transaction, mark every still-called guest as a no-show.
+// It does not call the next guest; Lexie taps Next for that.
+async function handleNoShow() {
+  if (actionRunning) return;
+  actionRunning = true;
+  clearActionMessage();
+  refreshButtonStates();
+
+  try {
+    const calledIds = calledGuests.map((guest) => guest.id);
+
+    await runTransaction(db, async (tx) => {
+      const calledRefs = calledIds.map((id) => doc(db, "guests", id));
+      const calledSnapshots = await Promise.all(
+        calledRefs.map((ref) => tx.get(ref))
+      );
+
+      for (const snapshot of calledSnapshots) {
+        if (snapshot.exists() && snapshot.data().status === "called") {
+          tx.update(snapshot.ref, { status: "noshow" });
+        }
+      }
+    });
+
+    clearActionMessage();
+  } catch (_err) {
+    showActionError();
+  } finally {
+    actionRunning = false;
+    refreshButtonStates();
+  }
 }
 
 function startLineListener() {
@@ -95,6 +241,20 @@ function startLineListener() {
       lineError.hidden = false;
     }
   );
+
+  const calledQuery = query(
+    collection(db, "guests"),
+    where("status", "==", "called")
+  );
+  onSnapshot(
+    calledQuery,
+    (snapshot) => {
+      renderCalled(snapshot.docs);
+    },
+    () => {
+      lineError.hidden = false;
+    }
+  );
 }
 
 function unlock() {
@@ -103,6 +263,9 @@ function unlock() {
   lineView.hidden = false;
   startLineListener();
 }
+
+nextBtn.addEventListener("click", handleNext);
+noshowBtn.addEventListener("click", handleNoShow);
 
 signInForm.addEventListener("submit", async (event) => {
   event.preventDefault();
