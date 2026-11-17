@@ -6,7 +6,11 @@ Guests scan a QR code at the booth, type their first name, and watch their place
 
 ## Status
 
-**Slice 1, steps 1 to 3 are built:** the Join page is in `public/index.html` and `public/join.js`. It saves a guest's first name to the Firestore collection `guests` and, after joining, shows a live "my place" view: the place in line updates on its own, a big "You're up!" appears when the guest is called, and closing and reopening the page keeps their place. It is live at `https://lexies-photo-pop.web.app`. Steps 4 through 6 follow, one build step at a time, following the build brief.
+**Slice 1, steps 1 to 4 are built:** the Join page is in `public/index.html` and `public/join.js`. It saves a guest's first name to the Firestore collection `guests` and, after joining, shows a live "my place" view: the place in line updates on its own, a big "You're up!" appears when the guest is called, and closing and reopening the page keeps their place. Steps 1 to 3 are live at `https://lexies-photo-pop.web.app`; step 4 (the dashboard) is built and goes live with the usual `firebase deploy --only hosting`. Steps 5 and 6 follow, one build step at a time, following the build brief.
+
+## Dashboard
+
+The dashboard is at `/dashboard.html`. It is a light lock for Lexie only: the passcode is set in Firestore at `settings/dashboard`, field `passcode` (a string), and it is never written in this repo.
 
 ## How the docs are laid out
 
