@@ -6,7 +6,7 @@ Guests scan a QR code at the booth, type their first name, and watch their place
 
 ## Status
 
-**Slice 1, all six steps are built:** the Join page is in `public/index.html` and `public/join.js`. It saves a guest's first name to the Firestore collection `guests` and, after joining, shows a live "my place" view: the place in line updates on its own, a big "You're up!" appears when the guest is called, and closing and reopening the page keeps their place. The dashboard at `/dashboard.html` shows the line behind a passcode. Step 5 adds a big Next button that calls the next guest and a No-show button for someone who doesn't come up. Step 6 adds an End event button on the dashboard that clears the whole line, a printable QR code page for guests to scan to join, and Firestore rules to replace test mode. Steps 1 to 5 are live at `https://lexies-photo-pop.web.app`.
+**Slice 1, all six steps are built:** the Join page is in `public/index.html` and `public/join.js`. It saves a guest's first name to the Firestore collection `guests` and, after joining, shows a live "my place" view: the place in line updates on its own, a big "You're up!" appears when the guest is called, and closing and reopening the page keeps their place. The dashboard at `/dashboard.html` shows the line behind a passcode. Step 5 adds a big Next button that calls the next guest and a No-show button for someone who doesn't come up. Step 6 adds an End event button on the dashboard that clears the whole line, a printable QR code page for guests to scan to join, and Firestore rules to replace test mode. It is live at `https://lexies-photo-pop.web.app`.
 
 ## Dashboard
 
