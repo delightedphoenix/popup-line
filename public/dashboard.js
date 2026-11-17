@@ -118,7 +118,8 @@ function renderLine(docs) {
   lineHeading.textContent =
     waitingGuests.length === 0
       ? "No one is waiting yet."
-      : waitingGuests.length + " waiting";
+      : `${waitingGuests.length} guest${waitingGuests.length === 1 ? "" : "s"} waiting`;
+
   lineError.hidden = true;
 
   refreshNowUp();
