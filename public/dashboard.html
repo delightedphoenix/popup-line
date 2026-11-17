@@ -20,9 +20,14 @@
       padding: 0;
     }
 
-    html,
-    body {
+    html {
       height: 100%;
+    }
+
+    /* min-height, not height: a long line must be able to grow past the
+       screen and scroll, instead of being cut off at the top. */
+    body {
+      min-height: 100%;
     }
 
     body {
